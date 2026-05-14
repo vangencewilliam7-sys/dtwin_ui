@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* ── Premium Monochromatic Blue Theme sampling ───────────────── */
+  --bg-base:         #F4F7FB;
+  --bg-surface:      #FFFFFF;
+  --bg-card:         #FFFFFF;
+  --bg-card-hover:   #F0F4F8;
+  --bg-elevated:     #F8FAFC;
+
+  --accent-primary:  #0077B6;
+  --accent-glow:     rgba(0, 119, 182, 0.12);
+  --accent-teal:     #0077B6;
+  --accent-teal-glow:rgba(0, 119, 182, 0.12);
+  --accent-amber:    #F59E0B;
+  --accent-orange:   #EA580C;
+  --accent-red:      #EF4444;
+  --accent-green:    #10B981;
+  --accent-blue:     #0077B6;
+
+  --text-primary:    #03045E;
+  --text-secondary:  #475569;
+  --text-muted:      #94A3B8;
+
+  --border:          #E2E8F0;
+  --border-bright:   #CBD5E1;
+
+  --radius-sm:       12px;
+  --radius-md:       18px;
+  --radius-lg:       24px;
+  --radius-xl:       32px;
+
+  --shadow-card:     0 4px 20px -2px rgba(3, 4, 94, 0.04), 0 2px 8px -1px rgba(3, 4, 94, 0.02);
+  --shadow-elevated: 0 12px 30px -4px rgba(3, 4, 94, 0.08), 0 4px 12px -2px rgba(3, 4, 94, 0.03);
+  --shadow-glow:     0 0 40px rgba(0, 119, 182, 0.15);
+}
+
+html { height: 100%; }
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  min-height: 100%;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: #90E0EF; border-radius: 3px; }
+
+/* ── Utility ────────────────────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+}
+
+.glow-teal  { box-shadow: var(--shadow-glow); }
+.glow-blue  { box-shadow: 0 0 32px rgba(0, 119, 182, 0.12); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.badge-blue   { background: #CAF0F8;   color: #03045E; border: 1px solid #90E0EF; }
+.badge-teal   { background: #CAF0F8;   color: #0077B6; border: 1px solid #90E0EF; }
+.badge-amber  { background: #FFFBEB;   color: #D97706; border: 1px solid #FDE68A; }
+.badge-green  { background: #F0FDF4;   color: #16A34A; border: 1px solid #BBF7D0; }
+.badge-red    { background: #FEF2F2;   color: #DC2626; border: 1px solid #FECACA; }
+.badge-slate  { background: #F1F5F9;   color: #64748B; border: 1px solid #E2E8F0; }
+
+/* ── Animations ─────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 16px rgba(0, 119, 182, 0.15); }
+  50%       { box-shadow: 0 0 32px rgba(0, 119, 182, 0.3); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes checkmark {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-check { animation: checkmark 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+
+.fade-up { animation: fadeUp 0.5s ease both; }
+.pulse-glow { animation: pulse-glow 2.5s ease infinite; }
+.blink { animation: blink 2s ease infinite; }
+.pulse { animation: pulse 2s ease-in-out infinite; }
+.float { animation: float 3s ease-in-out infinite; }
+
+.loading-dots span {
+  animation: blink 1.4s infinite both;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
