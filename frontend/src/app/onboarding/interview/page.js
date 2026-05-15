@@ -1,61 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-const DUMMY_QUESTIONS = [
-  {
-    id: 1,
-    question: "When a complex situation deviates from standard protocol, what is your first instinct?",
-    options: [
-      "Follow the documented fallback procedure strictly.",
-      "Analyze historical patterns to find a similar anomaly.",
-      "Perform a micro-adjustment based on subtle situational cues.",
-      "Escalate for a peer review immediately."
-    ]
-  },
-  {
-    id: 2,
-    question: "Which factor most influences your decision to apply an unconventional solution?",
-    options: [
-      "The client's unique long-term history and subtle context.",
-      "A 'gut feeling' developed over years of domain practice.",
-      "Recent industry breakthroughs not yet in the official manual.",
-      "The immediate risk-reward ratio for the current task."
-    ]
-  },
-  {
-    id: 3,
-    question: "How do you validate the success of an 'Intuition-based' decision?",
-    options: [
-      "If the outcome aligns perfectly with my initial prediction.",
-      "If the process was significantly more efficient than the standard route.",
-      "If I can later justify the logic clearly to a team member.",
-      "If the final results show a significant improvement over baseline."
-    ]
-  },
-  {
-    id: 4,
-    question: "In a high-pressure scenario with conflicting data, which source do you trust most?",
-    options: [
-      "Real-time monitoring and raw data metrics.",
-      "Your own accumulated experience from similar past cases.",
-      "The collective consensus of the immediate core team.",
-      "The most recent peer-reviewed institutional standard."
-    ]
-  }
-]
+// No local dummy questions. Fetching strictly from backend.
 
 export default function TacitExtractionPage() {
   const router = useRouter()
+  const [questions, setQuestions] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [answers, setAnswers] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/onboarding/interview-questions')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch')
+        return res.json()
+      })
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          setQuestions(data)
+        }
+      })
+      .catch(err => console.error("Failed to fetch questions:", err))
+      .finally(() => setIsLoading(false))
+  }, [])
 
   const handleSelect = (questionId, option) => {
     setAnswers({ ...answers, [questionId]: option })
   }
 
-  const allAnswered = Object.keys(answers).length === DUMMY_QUESTIONS.length
+  const allAnswered = questions.length > 0 && Object.keys(answers).length === questions.length
 
   const handleSubmit = () => {
     setIsSubmitting(true)
@@ -104,56 +80,67 @@ export default function TacitExtractionPage() {
           gap: 20,
           background: '#FAFBFC'
         }}>
-          {DUMMY_QUESTIONS.map((q, idx) => (
-            <div key={q.id} style={{
-              padding: '16px 20px',
-              borderRadius: '16px',
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-            }}>
-              <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
-                <span style={{ 
-                  width: 20, height: 20, borderRadius: '50%', background: '#03045E', 
-                  color: '#FFF', fontSize: 11, fontWeight: 700, display: 'flex', 
-                  alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                }}>
-                  {idx + 1}
-                </span>
-                <h2 style={{ fontSize: 14, fontWeight: 700, color: '#03045E', lineHeight: 1.4 }}>
-                  {q.question}
-                </h2>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {q.options.map((opt, i) => {
-                  const isSelected = answers[q.id] === opt
-                  return (
-                    <div 
-                      key={i}
-                      onClick={() => handleSelect(q.id, opt)}
-                      style={{
-                        padding: '12px 16px',
-                        borderRadius: '10px',
-                        background: isSelected ? '#0077B6' : '#FFFFFF',
-                        border: `1px solid ${isSelected ? '#0077B6' : '#E2E8F0'}`,
-                        color: isSelected ? '#FFFFFF' : '#475569',
-                        fontSize: 12,
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        boxShadow: isSelected ? '0 4px 12px rgba(0, 119, 182, 0.2)' : 'none',
-                        display: 'flex',
-                        alignItems: 'center'
-                      }}
-                    >
-                      {opt}
-                    </div>
-                  )
-                })}
-              </div>
+          {isLoading ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
+              <div style={{ width: 32, height: 32, border: '3px solid #E2E8F0', borderTop: '3px solid #0077B6', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
+              Loading Tacit Questions...
             </div>
-          ))}
+          ) : questions.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#64748B', background: '#FFFFFF', borderRadius: 16, border: '1px solid #E2E8F0' }}>
+              No tacit extraction questions available. Please ensure the backend is connected and master cases are uploaded.
+            </div>
+          ) : (
+            questions.map((q, idx) => (
+              <div key={q.id} style={{
+                padding: '16px 20px',
+                borderRadius: '16px',
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+              }}>
+                <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+                  <span style={{ 
+                    width: 20, height: 20, borderRadius: '50%', background: '#03045E', 
+                    color: '#FFF', fontSize: 11, fontWeight: 700, display: 'flex', 
+                    alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                  }}>
+                    {idx + 1}
+                  </span>
+                  <h2 style={{ fontSize: 14, fontWeight: 700, color: '#03045E', lineHeight: 1.4 }}>
+                    {q.question}
+                  </h2>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  {q.options.map((opt, i) => {
+                    const isSelected = answers[q.id] === opt
+                    return (
+                      <div 
+                        key={i}
+                        onClick={() => handleSelect(q.id, opt)}
+                        style={{
+                          padding: '12px 16px',
+                          borderRadius: '10px',
+                          background: isSelected ? '#0077B6' : '#FFFFFF',
+                          border: `1px solid ${isSelected ? '#0077B6' : '#E2E8F0'}`,
+                          color: isSelected ? '#FFFFFF' : '#475569',
+                          fontSize: 12,
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: isSelected ? '0 4px 12px rgba(0, 119, 182, 0.2)' : 'none',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        {opt}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* FIXED FOOTER */}

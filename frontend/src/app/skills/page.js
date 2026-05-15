@@ -1,9 +1,10 @@
 'use client'
 import Sidebar from '../../components/layout/Sidebar'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SkillSandbox from '../../components/skills/SkillSandbox'
 import GuardrailEditor from '../../components/skills/GuardrailEditor'
 import ExecutionLogViewer from '../../components/skills/ExecutionLogViewer'
+import { WarningIcon } from '../../components/ui/SparkleIcons'
 
 const TABS = [
   { id: 'registry',   label: 'Registry',    icon: '📋' },
@@ -12,104 +13,37 @@ const TABS = [
   { id: 'audit',      label: 'Audit Log',   icon: '📊' },
 ]
 
-// ─── Universal Skill Registry Data ─────────────────────────────────────────────
-const INITIAL_SKILLS = [
-  // Functional Skills (F)
-  { 
-    id: 'SKL_WEB_SCRAPER', 
-    label: 'Real-Time Web Scraper', 
-    type: 'functional', 
-    status: 'implemented',
-    flow: ['Target URL Parsing', 'DOM Feature Extraction', 'JSON Payload Synthesis'],
-    description: 'Dynamic live acquisition framework extracting targeted web elements and building structured analytical profiles.', 
-    params: ['target_url', 'extraction_depth', 'allowed_domains'], 
-    composes: ['HTTP_CRAWLER', 'DOM_PARSER'] 
-  },
-  { 
-    id: 'SKL_COMPLIANCE_GATEKEEPER', 
-    label: 'Compliance Gatekeeper', 
-    type: 'functional', 
-    status: 'implemented',
-    flow: ['Artifact Audit', 'Metrics Extraction', 'Approval Verdict'],
-    description: 'Multi-step compliance readiness verification ensuring prerequisites meet stringent organizational safety baselines.', 
-    params: ['client_id', 'target_date', 'required_documents'], 
-    composes: ['ACT_CHECKLIST_VERIFY', 'ACT_DOCUMENT_OCR'] 
-  },
-  { 
-    id: 'SKL_EXPERT_SYNTHESIS', 
-    label: 'Expert Brief Synthesis', 
-    type: 'functional', 
-    status: 'implemented',
-    flow: ['Stream Aggregation', 'Brief Formatting', 'Conditional Dispatch'],
-    description: 'Autonomous data consolidation orchestrating dynamic summaries and securely relaying targeted dispatches.', 
-    params: ['client_id', 'data_sources', 'release_approved'], 
-    composes: ['KNW_METRIC_SYNTHESIS', 'send_communication'] 
-  },
-  { 
-    id: 'SKL_BASELINE_VIGILANCE', 
-    label: 'Baseline Vigilance', 
-    type: 'functional', 
-    status: 'implemented',
-    flow: ['Metrics Ingestion', 'Historical Comparison', 'Anomaly Detection'],
-    description: 'Extract operational metrics continuously to compare against primary historical baselines for breach detection.', 
-    params: ['client_id', 'baseline_thresholds', 'source_url'], 
-    composes: ['ACT_DOCUMENT_OCR'] 
-  },
-
-  // Base Skills (B)
-  { 
-    id: 'book_appointment', 
-    label: 'Schedule Session', 
-    type: 'base', 
-    status: 'implemented',
-    description: 'Book an authorized appointment block via unified calendar API gateways.', 
-    params: ['client_id', 'appointment_time', 'reason_code'] 
-  },
-  { 
-    id: 'send_communication', 
-    label: 'Secure Dispatch', 
-    type: 'base', 
-    status: 'implemented',
-    description: 'Transmit encrypted notifications via integrated external messaging providers.', 
-    params: ['template_id', 'recipient_address', 'dynamic_vars'] 
-  },
-  { 
-    id: 'ACT_DOCUMENT_OCR', 
-    label: 'Document Parsing OCR', 
-    type: 'base', 
-    status: 'implemented',
-    description: 'Extract highly accurate text structures and tabular arrays from complex source graphics.', 
-    params: ['image_url', 'extraction_type'] 
-  },
-  { 
-    id: 'KNW_METRIC_SYNTHESIS', 
-    label: 'Metric Aggregation', 
-    type: 'base', 
-    status: 'implemented',
-    description: 'Consolidate distributed multi-stream parameters into structured JSON data models.', 
-    params: ['client_id', 'data_sources'] 
-  },
-  { 
-    id: 'ACT_CHECKLIST_VERIFY', 
-    label: 'Artifact Verification', 
-    type: 'base', 
-    status: 'implemented',
-    description: 'Audit uploaded materials systematically for strict presence and logical completeness.', 
-    params: ['client_id', 'required_documents'] 
-  },
-]
-
+// No local dummy data. All skills are fetched from the backend.
 export default function SkillsPage() {
   const [activeTab, setActiveTab] = useState('registry')
   
-  // Track toggle states for each skill dynamically
-  const [skillStates, setSkillStates] = useState(() => {
-    const initial = {}
-    INITIAL_SKILLS.forEach(s => {
-      initial[s.id] = true // default all to ON
-    })
-    return initial
-  })
+  const [skills, setSkills] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [skillStates, setSkillStates] = useState({})
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/skills')
+      .then(r => {
+        if (!r.ok) throw new Error('Backend not connected or route missing')
+        return r.json()
+      })
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          setSkills(data)
+          const initial = {}
+          data.forEach(s => {
+            initial[s.id] = s.default_state ?? true
+          })
+          setSkillStates(initial)
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch skills from backend:", err.message)
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }, [])
 
   const toggleSkillState = (id, newState) => {
     setSkillStates(prev => ({
@@ -118,8 +52,8 @@ export default function SkillsPage() {
     }))
   }
 
-  const baseSkills = INITIAL_SKILLS.filter(s => s.type === 'base')
-  const functionalSkills = INITIAL_SKILLS.filter(s => s.type === 'functional')
+  const baseSkills = skills.filter(s => s.type === 'base')
+  const functionalSkills = skills.filter(s => s.type === 'functional')
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F4F7FB' }}>
@@ -145,6 +79,20 @@ export default function SkillsPage() {
             </div>
           </div>
         </div>
+
+        {/* Loading / Empty States */}
+        {isLoading && activeTab === 'registry' && (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
+            <div style={{ width: 32, height: 32, border: '3px solid #E2E8F0', borderTop: '3px solid #0077B6', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
+            Loading registry...
+          </div>
+        )}
+
+        {!isLoading && skills.length === 0 && activeTab === 'registry' && (
+          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '40px', borderRadius: '16px', textAlign: 'center', color: '#64748B' }}>
+            No skills have been registered or connected to this twin yet.
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="fade-up" style={{

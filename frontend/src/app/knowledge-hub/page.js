@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { WordLogo, PdfLogo, LockIcon, UnlockIcon } from '../../components/ui/DocLogos'
 
 export default function KnowledgeHubPage() {
+  const [activeTab, setActiveTab] = useState('base')
   const [files, setFiles] = useState([])
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -255,8 +256,33 @@ export default function KnowledgeHubPage() {
         <div className="fade-up" style={{ marginBottom: 36 }}>
           <h1 style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Knowledge Hub Ingestion</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-            Upload multiple clinical documents (.pdf or .docx) to batch-process them through the pipeline.
+            Manage and upload source documents and master case references for your Digital Twin.
           </p>
+
+          <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+            <button
+              onClick={() => setActiveTab('base')}
+              style={{
+                background: activeTab === 'base' ? '#F0F9FF' : 'transparent',
+                color: activeTab === 'base' ? '#0077B6' : 'var(--text-secondary)',
+                border: activeTab === 'base' ? '1px solid #90E0EF' : '1px solid transparent',
+                padding: '10px 20px', borderRadius: '99px', fontWeight: 600, fontSize: 14, cursor: 'pointer', transition: 'all 0.2s'
+              }}
+            >
+              📚 Base Knowledge
+            </button>
+            <button
+              onClick={() => setActiveTab('cases')}
+              style={{
+                background: activeTab === 'cases' ? '#FFFBEB' : 'transparent',
+                color: activeTab === 'cases' ? '#D97706' : 'var(--text-secondary)',
+                border: activeTab === 'cases' ? '1px solid #FDE68A' : '1px solid transparent',
+                padding: '10px 20px', borderRadius: '99px', fontWeight: 600, fontSize: 14, cursor: 'pointer', transition: 'all 0.2s'
+              }}
+            >
+              🧠 Master Cases
+            </button>
+          </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
@@ -265,7 +291,14 @@ export default function KnowledgeHubPage() {
             background: '#FFFFFF', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)',
             padding: '32px', width: '100%', boxShadow: 'var(--shadow-card)'
           }}>
-            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 24 }}>Upload Source Material</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
+              {activeTab === 'base' ? 'Upload Source Material' : 'Upload Master Cases'}
+            </h2>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24 }}>
+              {activeTab === 'base' 
+                ? 'Upload your core documentation (SOPs, guidelines, manuals) to build the base knowledge.'
+                : 'Upload curated case files that represent complex, real-world scenarios for the AI to study.'}
+            </p>
 
             <div style={{
               border: '2px dashed var(--border)', borderRadius: 'var(--radius-md)', padding: '40px',

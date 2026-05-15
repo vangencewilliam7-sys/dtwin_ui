@@ -73,26 +73,10 @@ export default function DashboardPage() {
             <div>
               <h1 style={{ fontSize: 26, fontWeight: 700, marginBottom: 4, color: '#03045E' }}>Expert Digital Twin</h1>
               <p style={{ color: '#475569', fontSize: 14 }}>
-                Active Domain: Professional Services · Persona Engine · Season 1
+                Active Domain: Professional Services · Persona Engine
               </p>
             </div>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '8px 16px',
-              borderRadius: '12px',
-              border: `1px solid ${health?.status === 'healthy' ? '#90E0EF' : '#FECACA'}`,
-              background: health?.status === 'healthy' ? '#CAF0F8' : '#FEF2F2',
-              fontSize: 13,
-              color: health?.status === 'healthy' ? '#03045E' : '#DC2626',
-              fontWeight: 500,
-            }}>
-              <span style={{
-                width: 7, height: 7, borderRadius: '50%',
-                background: health?.status === 'healthy' ? '#0077B6' : '#EF4444',
-                display: 'inline-block',
-              }} />
-              {health?.status === 'healthy' ? `Backend online · ${health.active_domain}` : 'Backend offline'}
-            </div>
+
           </div>
         </div>
 

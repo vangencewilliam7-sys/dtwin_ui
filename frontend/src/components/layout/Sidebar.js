@@ -73,7 +73,7 @@ export default function Sidebar({ active }) {
           <span style={{ fontSize: 22, filter: 'brightness(10)' }}>✨</span>
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>Expert Twin</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', fontWeight: 600, letterSpacing: '0.5px' }}>SEASON 1 · DT</div>
+
           </div>
         </div>
       </div>

@@ -1,38 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import SuccessOverlay from '../../../components/ui/SuccessOverlay'
 
-const PERSONA_QUESTIONS = [
-  {
-    id: 1,
-    question: "Interaction Philosophy: How should your Twin interact with users?",
-    placeholder: "e.g., Use formal and precise language, focus on data-heavy responses..."
-  },
-  {
-    id: 2,
-    question: "Autonomous Authority: Describe your Digital Twin's level of autonomy.",
-    placeholder: "e.g., Supervise all actions but allow high autonomy in low-risk reporting..."
-  },
-  {
-    id: 3,
-    question: "Expert Archetype: Which defines your professional digital presence?",
-    placeholder: "e.g., The Stoic Analyst, calm under pressure and deeply collaborative..."
-  },
-  {
-    id: 4,
-    question: "Critical Feedback: How should the Twin deliver corrections?",
-    placeholder: "e.g., Direct and factual, or gentle corrective guidance as a mentor..."
-  }
-]
+// No local dummy questions. Fetching strictly from backend.
 
 export default function PersonaCreationPage() {
   const router = useRouter()
+  const [questions, setQuestions] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [answers, setAnswers] = useState({})
   const [isRecording, setIsRecording] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/onboarding/persona-questions')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch')
+        return res.json()
+      })
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          setQuestions(data)
+        }
+      })
+      .catch(err => console.error("Failed to fetch persona questions:", err))
+      .finally(() => setIsLoading(false))
+  }, [])
 
   const handleInputChange = (questionId, value) => {
     setAnswers({ ...answers, [questionId]: value })
@@ -101,110 +97,121 @@ export default function PersonaCreationPage() {
           gap: 24,
           background: '#FDFEFE'
         }}>
-          {PERSONA_QUESTIONS.map((q, idx) => (
-            <div key={q.id} style={{
-              padding: '20px',
-              borderRadius: '16px',
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-            }}>
-              <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-                <span style={{ 
-                  width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #7209B7, #3F37C9)', 
-                  color: '#FFF', fontSize: 12, fontWeight: 700, display: 'flex', 
-                  alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                }}>
-                  {idx + 1}
-                </span>
-                <h2 style={{ fontSize: 15, fontWeight: 700, color: '#03045E', lineHeight: 1.4 }}>
-                  {q.question}
-                </h2>
-              </div>
-
-              <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                <textarea 
-                  placeholder={q.placeholder}
-                  value={answers[q.id] || ''}
-                  onChange={(e) => handleInputChange(q.id, e.target.value)}
-                  style={{
-                    flex: 1,
-                    minHeight: '80px',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    border: '1px solid #E2E8F0',
-                    fontSize: 14,
-                    fontFamily: 'inherit',
-                    resize: 'none',
-                    background: '#F8FAFC',
-                    transition: 'border-color 0.2s ease',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#7209B7'}
-                  onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
-                />
-                
-                <button 
-                  onClick={() => toggleRecording(q.id)}
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '12px',
-                    background: isRecording === q.id ? '#EF4444' : '#F1F5F9',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s ease',
-                    flexShrink: 0
-                  }}
-                  title={isRecording === q.id ? "Stop Recording" : "Record Answer"}
-                >
-                  <span style={{ 
-                    fontSize: 20, 
-                    color: isRecording === q.id ? '#FFF' : '#64748B',
-                    animation: isRecording === q.id ? 'pulse 1.5s infinite' : 'none'
-                  }}>
-                    {isRecording === q.id ? '⏹' : '🎤'}
-                  </span>
-                </button>
-              </div>
-              
-              {isRecording === q.id && (
-                <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444' }} className="pulse" />
-                    <span style={{ fontSize: 13, color: '#EF4444', fontWeight: 700, letterSpacing: '0.02em' }}>
-                      CAPTURING EXPERT VOICE...
-                    </span>
-                  </div>
-                  
-                  {/* Voice Wave Animation (High-End GIF Style) */}
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'flex-end', 
-                    gap: 3, 
-                    height: 32, 
-                    padding: '0 10px',
-                    background: 'rgba(239, 68, 68, 0.05)',
-                    borderRadius: '8px',
-                    width: 'fit-content'
-                  }}>
-                    {[...Array(12)].map((_, i) => (
-                      <div key={i} style={{
-                        width: 3,
-                        background: '#EF4444',
-                        borderRadius: '3px',
-                        animation: `wave-grow 1s ease-in-out infinite ${i * 0.1}s`,
-                        height: '20%'
-                      }} />
-                    ))}
-                  </div>
-                </div>
-              )}
+          {isLoading ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
+              <div style={{ width: 32, height: 32, border: '3px solid #E2E8F0', borderTop: '3px solid #7209B7', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
+              Loading Persona Configuration...
             </div>
-          ))}
+          ) : questions.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#64748B', background: '#FFFFFF', borderRadius: 16, border: '1px solid #E2E8F0' }}>
+              No persona configuration questions available. Please ensure the backend is connected.
+            </div>
+          ) : (
+            questions.map((q, idx) => (
+              <div key={q.id} style={{
+                padding: '20px',
+                borderRadius: '16px',
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+              }}>
+                <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+                  <span style={{ 
+                    width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, #7209B7, #3F37C9)', 
+                    color: '#FFF', fontSize: 12, fontWeight: 700, display: 'flex', 
+                    alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                  }}>
+                    {idx + 1}
+                  </span>
+                  <h2 style={{ fontSize: 15, fontWeight: 700, color: '#03045E', lineHeight: 1.4 }}>
+                    {q.question}
+                  </h2>
+                </div>
+
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <textarea 
+                    placeholder={q.placeholder}
+                    value={answers[q.id] || ''}
+                    onChange={(e) => handleInputChange(q.id, e.target.value)}
+                    style={{
+                      flex: 1,
+                      minHeight: '80px',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      border: '1px solid #E2E8F0',
+                      fontSize: 14,
+                      fontFamily: 'inherit',
+                      resize: 'none',
+                      background: '#F8FAFC',
+                      transition: 'border-color 0.2s ease',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#7209B7'}
+                    onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
+                  />
+                  
+                  <button 
+                    onClick={() => toggleRecording(q.id)}
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: '12px',
+                      background: isRecording === q.id ? '#EF4444' : '#F1F5F9',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease',
+                      flexShrink: 0
+                    }}
+                    title={isRecording === q.id ? "Stop Recording" : "Record Answer"}
+                  >
+                    <span style={{ 
+                      fontSize: 20, 
+                      color: isRecording === q.id ? '#FFF' : '#64748B',
+                      animation: isRecording === q.id ? 'pulse 1.5s infinite' : 'none'
+                    }}>
+                      {isRecording === q.id ? '⏹' : '🎤'}
+                    </span>
+                  </button>
+                </div>
+                
+                {isRecording === q.id && (
+                  <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444' }} className="pulse" />
+                      <span style={{ fontSize: 13, color: '#EF4444', fontWeight: 700, letterSpacing: '0.02em' }}>
+                        CAPTURING EXPERT VOICE...
+                      </span>
+                    </div>
+                    
+                    {/* Voice Wave Animation (High-End GIF Style) */}
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'flex-end', 
+                      gap: 3, 
+                      height: 32, 
+                      padding: '0 10px',
+                      background: 'rgba(239, 68, 68, 0.05)',
+                      borderRadius: '8px',
+                      width: 'fit-content'
+                    }}>
+                      {[...Array(12)].map((_, i) => (
+                        <div key={i} style={{
+                          width: 3,
+                          background: '#EF4444',
+                          borderRadius: '3px',
+                          animation: `wave-grow 1s ease-in-out infinite ${i * 0.1}s`,
+                          height: '20%'
+                        }} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
 
         {/* FIXED FOOTER */}
